@@ -622,18 +622,12 @@ public class Program
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
-	// this function takes a process id and a dll name, then returns the .TEXT bytes
+	
 	public static byte[] DLLTextSectionBytes(PeHeaderReader dllReader, bool inmemory, byte[] themodule)
 	{
 		byte[] Return = new byte[0];
-
-		// this variable contains the sections
 		PeHeaderReader.IMAGE_SECTION_HEADER[] modulesections = dllReader.ImageSectionHeaders;
-
-		// this variable holds the pointer to .TEXT section
 		int codeSectionPointer;
-
-		// iterate through the section until we found the .TEXT
  		for (int i = 0; i < modulesections.Length; i++)
 		{
 			char[] sectionname = modulesections[i].Name;
@@ -650,13 +644,10 @@ public class Program
 				return dllsectionbytes;
 			}
 		}
-
-
 		return Return;
-
 	}
 
-	// this function opens a process and returns the handle
+	
 	public static IntPtr GetProcessHandle(int process_id)
 	{
 		int PROCESS_VM_READ = (0x0010);
@@ -666,7 +657,7 @@ public class Program
 		return OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, true, process_id);
 	}
 
-	// this function takes a process handle and DLLname then enumerates the modules then returns the baseaddress of our target DLLname
+	
 	public static Boolean TheModuleBaseAddress(IntPtr process_handle)
 	{
 		IntPtr[] listofmodules = new IntPtr[1024];
@@ -692,7 +683,7 @@ public class Program
 		}
 		return false;
 	}
-	// if the DLLname exists above, we will read all of its bytes and returns its bytes
+	
 	public static byte[] InMemory_DLLBytes(IntPtr process_handle, IntPtr module_handle)
 	{
 		MODULEINFO dllinfo = new MODULEINFO();
@@ -702,11 +693,10 @@ public class Program
 		ReadProcessMemory(process_handle, module_handle, inmemory_dllbytes, inmemory_dllbytes.Length, ref bytesRead);
 		return inmemory_dllbytes;
 	}
-	// this function patches the bytes already in memory with the original bytes
+	
 	public static void Patch(IntPtr process_handle, byte[] originalbytes)
 	{
 		IntPtr InMemoryTextSectionPointer = inmemory_modulepointer + inmemory_textsectionvirtualaddress;
-		//IntPtr assemblyBytesLength = new IntPtr(originalbytes.Length);
 		uint oldProtect;
 		VirtualProtectEx(process_handle, InMemoryTextSectionPointer, (UIntPtr)originalbytes.Length, PAGE_READWRITE, out oldProtect);
 		WriteProcessMemory(process_handle, InMemoryTextSectionPointer, originalbytes, new IntPtr(originalbytes.Length), 0);
